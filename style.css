@@ -1,0 +1,38 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: white;
+  text-align: center;
+}
+
+#login, #app {
+  max-width: 400px;
+  margin: auto;
+  margin-top: 40px;
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  margin: 5px;
+}
+
+button {
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+#chat {
+  background: #222;
+  height: 200px;
+  overflow-y: auto;
+  margin: 10px;
+  padding: 10px;
+  text-align: left;
+}
+
+canvas {
+  background: black;
+  margin-bottom: 10px;
+  }
