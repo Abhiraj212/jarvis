@@ -2,30 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Jarvis AI – abhi.ai</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Jarvis AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<div id="login">
-  <h2>🔐 Enter Password</h2>
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
+<div id="app">
+  <h2>Jarvis AI</h2>
 
-<div id="app" hidden>
   <canvas id="face" width="200" height="200"></canvas>
 
   <div id="chat"></div>
 
   <input id="input" placeholder="Type here">
-  <div class="buttons">
+  <div class="btns">
     <button onclick="send()">Send</button>
     <button onclick="voice()">🎙 Voice</button>
-    <button onclick="save()">Save</button>
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="./script.js"></script>
 </body>
-    </html>
+</html>
