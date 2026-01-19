@@ -1,25 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Jarvis AI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Jarvis Web</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="app">
-    <h1>🤖 Jarvis</h1>
+<div class="chat-box">
+  <h2>🤖 Jarvis</h2>
 
-    <div id="chat"></div>
+  <div id="chat"></div>
 
-    <div class="input-area">
-        <input id="userInput" placeholder="Type something..." />
-        <button onclick="send()">Send</button>
-        <button onclick="speakToggle()">🔊</button>
-    </div>
+  <input id="userInput" placeholder="Type here..." />
+  <button onclick="send()">Send</button>
 </div>
 
-<script src="jarvis.js"></script>
+<script src="script.js"></script>
 </body>
-</html>
+    </html>
