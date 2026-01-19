@@ -1,97 +1,120 @@
+// ========================
+// JARVIS CORE CONFIG
+// ========================
+const JARVIS_NAME = "Jarvis";
+let voiceEnabled = true;
+
+// Load memory
+let memory = JSON.parse(localStorage.getItem("jarvisMemory")) || [];
+
+// ========================
+// CHAT SYSTEM
+// ========================
 const chat = document.getElementById("chat");
-const input = document.getElementById("input");
 
-// ---------- FACE ----------
-const canvas = document.getElementById("face");
-const ctx = canvas.getContext("2d");
+function addMsg(text, who) {
+    const div = document.createElement("div");
+    div.className = "msg " + who;
+    div.innerText = (who === "user" ? "You: " : "Jarvis: ") + text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
 
-function drawFace(talk=false) {
-  ctx.clearRect(0,0,200,200);
-
-  // eyes
-  ctx.fillStyle = "cyan";
-  ctx.beginPath(); ctx.arc(70,80,10,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(130,80,10,0,Math.PI*2); ctx.fill();
-
-  // mouth
-  ctx.fillStyle = talk ? "red" : "white";
-  ctx.beginPath(); ctx.arc(100,130,15,0,Math.PI); ctx.fill();
+    if (who === "jarvis" && voiceEnabled) speak(text);
 }
 
-drawFace();
-
-// ---------- SPEAK ----------
+// ========================
+// VOICE OUTPUT (WEB)
+// ========================
 function speak(text) {
-  drawFace(true);
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-IN";
-  u.onend = () => drawFace(false);
-  speechSynthesis.speak(u);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    speechSynthesis.speak(u);
 }
 
-// ---------- CHAT ----------
-function add(who, msg) {
-  chat.innerHTML += `<b>${who}:</b> ${msg}<br>`;
-  chat.scrollTop = chat.scrollHeight;
+// ========================
+// SEND MESSAGE
+// ========================
+function send() {
+    const input = document.getElementById("userInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMsg(text, "user");
+    input.value = "";
+
+    process(text.toLowerCase());
 }
 
-// ---------- SEND ----------
-function send(text=null) {
-  const msg = text || input.value.trim();
-  if (!msg) return;
+// ========================
+// COMMAND & AI LOGIC
+// ========================
+function process(msg) {
 
-  add("You", msg);
-  input.value = "";
-
-  // learned replies
-  let reply = localStorage.getItem("learn_" + msg.toLowerCase());
-
-  if (!reply) {
-    reply = "I am learning boss 😄";
-  }
-
-  add("Jarvis", reply);
-  speak(reply);
-}
-
-// ---------- VOICE INPUT ----------
-function voice() {
-  if (!("webkitSpeechRecognition" in window)) {
-    alert("Voice not supported in this browser");
-    return;
-  }
-
-  const r = new webkitSpeechRecognition();
-  r.lang = "en-IN";
-  r.onresult = e => send(e.results[0][0].transcript);
-  r.start();
-}
-
-// ---------- ENTER KEY ----------
-window.addEventListener("keydown", e => {
-  if (e.key === "Enter") send();
-});
-
-// ---------- LEARNING ----------
-// format: learn hello = Hello boss
-input.placeholder = "Type: learn hello = Hello boss 😎";
-
-input.addEventListener("change", () => {
-  const t = input.value;
-  if (t.startsWith("learn ")) {
-    const parts = t.replace("learn ","").split("=");
-    if (parts.length === 2) {
-      localStorage.setItem(
-        "learn_" + parts[0].trim().toLowerCase(),
-        parts[1].trim()
-      );
-      add("Jarvis", "Saved boss 😎");
-      speak("Saved boss");
-      input.value = "";
+    // ---- COMMANDS ----
+    if (msg === "clear memory") {
+        memory = [];
+        saveMemory();
+        addMsg("Memory cleared.", "jarvis");
+        return;
     }
-  }
-});
 
-// ---------- AUTO START MESSAGE ----------
-speak("Jarvis online boss");
-add("Jarvis", "Jarvis online boss 😎");
+    if (msg === "what is my name") {
+        const name = memory.find(m => m.key === "name");
+        addMsg(name ? "Your name is " + name.value : "I don't know yet.", "jarvis");
+        return;
+    }
+
+    if (msg.startsWith("my name is")) {
+        const name = msg.replace("my name is", "").trim();
+        remember("name", name);
+        addMsg("Got it. I'll remember your name.", "jarvis");
+        return;
+    }
+
+    // ---- LEARNING ----
+    if (msg.startsWith("remember")) {
+        const data = msg.replace("remember", "").trim();
+        remember("note", data);
+        addMsg("Saved this in memory.", "jarvis");
+        return;
+    }
+
+    // ---- SEARCH MEMORY ----
+    if (msg.includes("what did i say")) {
+        addMsg(memory.map(m => m.value).join(", ") || "Nothing yet.", "jarvis");
+        return;
+    }
+
+    // ---- DEFAULT AI REPLY ----
+    addMsg(defaultReply(msg), "jarvis");
+}
+
+// ========================
+// MEMORY SYSTEM
+// ========================
+function remember(key, value) {
+    memory.push({ key, value });
+    saveMemory();
+}
+
+function saveMemory() {
+    localStorage.setItem("jarvisMemory", JSON.stringify(memory));
+}
+
+// ========================
+// BASIC AI BRAIN
+// ========================
+function defaultReply(msg) {
+    if (msg.includes("hello")) return "Hello! I'm active.";
+    if (msg.includes("how are you")) return "I'm running perfectly.";
+    if (msg.includes("your name")) return "My name is " + JARVIS_NAME;
+    return "I heard you. I'm still learning.";
+}
+
+// ========================
+// VOICE TOGGLE
+// ========================
+function speakToggle() {
+    voiceEnabled = !voiceEnabled;
+    alert("Voice " + (voiceEnabled ? "ON" : "OFF"));
+}
