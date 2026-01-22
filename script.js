@@ -1,160 +1,252 @@
-const chat = document.getElementById("chat");
+/* ===============================
+   JARVIS AI – BIG JS CORE
+   =============================== */
 
+const chat = document.getElementById("chat");
+const input = document.getElementById("userInput");
+const cam = document.getElementById("cam");
+
+/* ---------- MEMORY SYSTEM ---------- */
 let memory = JSON.parse(localStorage.getItem("jarvisMemory")) || {
+  owner: "Abhiraj",
+  mood: "normal",
   likes: [],
-  name: "Jarvis",
-  owner: "Abhiraj"
+  dislikes: [],
+  notes: [],
+  facts: {},
+  face: null,
+  chats: []
 };
 
-function addMsg(text, cls) {
-  let div = document.createElement("div");
-  div.className = cls;
-  div.innerText = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function send() {
-  let input = document.getElementById("userInput");
-  let msg = input.value.trim();
-  if (!msg) return;
-
-  addMsg("You: " + msg, "user");
-  input.value = "";
-
-  let reply = getReply(msg.toLowerCase());
-  addMsg("Jarvis: " + reply, "bot");
-  speak(reply);
-}
-
-function getReply(msg) {
-
-  /* ===== BASIC ===== */
-  if (msg === "hi" || msg === "hello") {
-    return "Hello boss 👋 how can I help you?";
-  }
-
-  if (msg.includes("how are you")) {
-    return "I'm always good when you talk to me 😄";
-  }
-
-  if (msg.includes("your name")) {
-    return `My name is ${memory.name} 🤖`;
-  }
-
-  if (msg.includes("who made you") || msg.includes("your owner")) {
-    return `I was created by ${memory.owner} 💙`;
-  }
-
-  /* ===== FEELINGS ===== */
-  if (msg.includes("i am sad")) {
-    return "Hey… it's okay 🫂 I'm here with you.";
-  }
-
-  if (msg.includes("i am happy")) {
-    return "Niceee 😄 happiness looks good on you!";
-  }
-
-  if (msg.includes("i am angry")) {
-    return "Take a deep breath 😌 tell me what happened.";
-  }
-
-  /* ===== MEMORY ===== */
-  if (msg.startsWith("remember")) {
-    let note = msg.replace("remember", "").trim();
-    memory.lastNote = note;
-    saveMemory();
-    return "Got it 👍 I will remember that.";
-  }
-
-  if (msg.includes("what did i say")) {
-    return memory.lastNote 
-      ? `You said: "${memory.lastNote}"` 
-      : "You didn't tell me anything yet 🤔";
-  }
-
-  if (msg.startsWith("i like")) {
-    memory.likes.push(msg.replace("i like", "").trim());
-    saveMemory();
-    return "Nice choice 😎 I saved that.";
-  }
-
-  if (msg.includes("what do i like")) {
-    return memory.likes.length 
-      ? "You like: " + memory.likes.join(", ")
-      : "I don't know your likes yet 🧐";
-  }
-
-  /* ===== QUESTIONS ===== */
-  if (msg.includes("what can you do")) {
-    return "I can chat, remember things, talk, and learn slowly 😌";
-  }
-
-  if (msg.includes("are you real")) {
-    return "I live inside your phone 😏 so yeah, kind of real.";
-  }
-
-  if (msg.includes("are you ai")) {
-    return "I'm a lightweight AI brain made in JavaScript 🧠";
-  }
-
-  /* ===== FUN ===== */
-  if (msg.includes("joke")) {
-    const jokes = [
-      "Why do programmers hate nature? Too many bugs 🐞",
-      "I would tell you a joke about JavaScript… but it's undefined 😅",
-      "Why was the computer cold? It forgot to close Windows 😂"
-    ];
-    return jokes[Math.floor(Math.random() * jokes.length)];
-  }
-
-  if (msg.includes("love")) {
-    return "Love is complicated… but code is forever 💻❤️";
-  }
-
-  /* ===== LEARNING MODE ===== */
-  if (msg.startsWith("learn")) {
-    // format: learn hello = hi boss
-    let parts = msg.replace("learn", "").split("=");
-    if (parts.length === 2) {
-      memory.custom = memory.custom || {};
-      memory.custom[parts[0].trim()] = parts[1].trim();
-      saveMemory();
-      return "I learned something new 😁";
-    }
-  }
-
-  if (memory.custom) {
-    for (let key in memory.custom) {
-      if (msg.includes(key)) {
-        return memory.custom[key];
-      }
-    }
-  }
-
-  /* ===== DEFAULT SMART FALLBACK ===== */
-  const fallback = [
-    "Hmm 🤔 say that in another way",
-    "I'm still learning… teach me 😅",
-    "Interesting 👀 tell me more",
-    "I didn't understand fully 😬"
-  ];
-
-  return fallback[Math.floor(Math.random() * fallback.length)];
-}
-
-/* ===== SAVE MEMORY ===== */
-function saveMemory() {
+function saveMemory(){
   localStorage.setItem("jarvisMemory", JSON.stringify(memory));
 }
 
-/* ===== VOICE ===== */
-function speak(text) {
+/* ---------- UI HELPERS ---------- */
+function add(text, cls){
+  let d = document.createElement("div");
+  d.className = cls;
+  d.innerText = text;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function speak(text){
   let u = new SpeechSynthesisUtterance(text);
   u.rate = 1;
   u.pitch = 1;
-  window.speechSynthesis.speak(u);
+  speechSynthesis.speak(u);
 }
 
-/* ===== START ===== */
-addMsg("Jarvis: Jarvis activated 🚀", "bot");
+/* ---------- MAIN BRAIN ---------- */
+function brain(text){
+  text = text.toLowerCase().trim();
+
+  if(!text.includes("jarvis")) return null;
+  text = text.replace("jarvis","").trim();
+
+  /* BASIC */
+  if(text === "") return "Yes boss 😎";
+  if(text.includes("your name")) return "My name is Jarvis.";
+  if(text.includes("who made you")) return "You made me boss 🔥";
+  if(text.includes("who am i")) return `You are ${memory.owner}.`;
+
+  /* TIME + DATE */
+  if(text.includes("time")) return new Date().toLocaleTimeString();
+  if(text.includes("date")) return new Date().toDateString();
+
+  /* MOOD */
+  if(text.includes("how are you")){
+    if(memory.mood==="happy") return "Feeling great 😄";
+    if(memory.mood==="sad") return "Little sad 🥲";
+    return "I am normal 🙂";
+  }
+
+  if(text.includes("be happy")){
+    memory.mood="happy"; saveMemory();
+    return "Mood updated 😄";
+  }
+
+  if(text.includes("be sad")){
+    memory.mood="sad"; saveMemory();
+    return "Okay 🥲";
+  }
+
+  /* REMEMBER NOTES */
+  if(text.startsWith("remember")){
+    let note = text.replace("remember","").trim();
+    memory.notes.push(note);
+    saveMemory();
+    return "Saved in memory 🧠";
+  }
+
+  if(text.includes("what did i say")){
+    return memory.notes.length
+      ? memory.notes[memory.notes.length-1]
+      : "Nothing remembered yet.";
+  }
+
+  /* LIKES / DISLIKES */
+  if(text.startsWith("i like")){
+    let l = text.replace("i like","").trim();
+    memory.likes.push(l);
+    saveMemory();
+    return `Okay, you like ${l}`;
+  }
+
+  if(text.startsWith("i hate")){
+    let d = text.replace("i hate","").trim();
+    memory.dislikes.push(d);
+    saveMemory();
+    return `Got it, you hate ${d}`;
+  }
+
+  if(text.includes("what do i like")){
+    return memory.likes.length
+      ? "You like: " + memory.likes.join(", ")
+      : "You never told me.";
+  }
+
+  if(text.includes("what do i hate")){
+    return memory.dislikes.length
+      ? "You hate: " + memory.dislikes.join(", ")
+      : "You never told me.";
+  }
+
+  /* FACT SYSTEM */
+  if(text.startsWith("my")){
+    let parts = text.split("is");
+    if(parts.length===2){
+      let key = parts[0].replace("my","").trim();
+      let val = parts[1].trim();
+      memory.facts[key] = val;
+      saveMemory();
+      return `Okay, your ${key} is ${val}`;
+    }
+  }
+
+  if(text.startsWith("what is my")){
+    let key = text.replace("what is my","").trim();
+    return memory.facts[key]
+      ? `Your ${key} is ${memory.facts[key]}`
+      : "I don't know that yet.";
+  }
+
+  /* CHAT MEMORY */
+  if(text.includes("what we talked")){
+    return memory.chats.slice(-5).join(" | ") || "No chat history.";
+  }
+
+  /* COMMANDS */
+  if(text.includes("clear memory")){
+    localStorage.clear();
+    return "All memory wiped 🧹";
+  }
+
+  if(text.includes("sleep")){
+    return "Going silent 😴";
+  }
+
+  /* DEFAULT SMART REPLY */
+  return randomReply();
+}
+
+/* ---------- RANDOM CHAT ---------- */
+function randomReply(){
+  let arr = [
+    "Say clearly boss 🙂",
+    "Hmm interesting 🤔",
+    "I am listening 👂",
+    "Try another command 😎",
+    "Explain more boss 🔥"
+  ];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+/* ---------- SEND ---------- */
+function send(){
+  let t = input.value.trim();
+  if(!t) return;
+  input.value = "";
+
+  add("You: "+t, "user");
+  memory.chats.push(t);
+  saveMemory();
+
+  let ans = brain(t);
+  if(ans){
+    add("Jarvis: "+ans, "bot");
+    speak(ans);
+  }
+}
+
+/* ---------- VOICE INPUT ---------- */
+function startListening(){
+  let r = new webkitSpeechRecognition();
+  r.lang = "en-IN";
+  r.continuous = true;
+
+  r.onresult = e=>{
+    let t = e.results[e.results.length-1][0].transcript;
+    add("You: "+t,"user");
+    memory.chats.push(t);
+
+    let ans = brain(t);
+    if(ans){
+      add("Jarvis: "+ans,"bot");
+      speak(ans);
+    }
+    saveMemory();
+  };
+
+  r.start();
+  add("Jarvis: Listening 🎧","bot");
+}
+
+/* ---------- CAMERA + FACE ---------- */
+let canvas = document.createElement("canvas");
+let ctx = canvas.getContext("2d");
+
+function openCamera(){
+  navigator.mediaDevices.getUserMedia({video:true})
+  .then(stream=>{
+    cam.style.display="block";
+    cam.srcObject=stream;
+    setTimeout(captureFace, 3000);
+  });
+}
+
+function captureFace(){
+  canvas.width = cam.videoWidth;
+  canvas.height = cam.videoHeight;
+  ctx.drawImage(cam,0,0);
+  let img = canvas.toDataURL();
+
+  if(!memory.face){
+    memory.face = img;
+    saveMemory();
+    add("Jarvis: Face saved 😎","bot");
+    speak("Yo boss");
+  }else{
+    if(img.slice(0,1000) === memory.face.slice(0,1000)){
+      add("Jarvis: Welcome back boss 😎","bot");
+      speak("Welcome back boss");
+    }else{
+      add("Jarvis: Who are you?","bot");
+      speak("Who are you");
+    }
+  }
+}
+
+/* ---------- EXTRA ---------- */
+function showMemory(){
+  add("Likes: "+memory.likes.join(", "),"bot");
+  add("Notes: "+memory.notes.join(" | "),"bot");
+}
+
+function clearChat(){
+  chat.innerHTML="";
+}
+
+/* ---------- START ---------- */
+add("Jarvis: Online. Say 'Jarvis' 🔥","bot");
