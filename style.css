@@ -1,81 +1,63 @@
 body {
   margin: 0;
-  background: #05080d;
   font-family: Arial, sans-serif;
-  color: #00f5ff;
-}
-
-.hud {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  padding: 10px;
-}
-
-.top {
-  text-align: center;
-  letter-spacing: 2px;
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-#chat {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.msg {
-  margin: 8px 0;
-}
-
-.user {
+  background: #0b0f19;
   color: #fff;
 }
 
-.jarvis {
-  color: #00f5ff;
+.app {
+  max-width: 500px;
+  margin: auto;
+  padding: 10px;
 }
 
-.input-area {
+h1 {
+  text-align: center;
+  color: #00ffd5;
+}
+
+video {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.chat {
+  height: 300px;
+  overflow-y: auto;
+  background: #111;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.msg {
+  margin-bottom: 8px;
+}
+
+.user {
+  color: #00ffd5;
+}
+
+.jarvis {
+  color: #ffdd57;
+}
+
+.input-box {
   display: flex;
-  gap: 6px;
+  gap: 5px;
+  margin-top: 10px;
 }
 
 input {
   flex: 1;
   padding: 10px;
-  background: #0b1220;
+  border-radius: 8px;
   border: none;
-  color: #00f5ff;
 }
 
 button {
-  background: #00f5ff;
-  border: none;
   padding: 10px;
-  cursor: pointer;
-}
-video {
-  width: 100%;
-  max-height: 120px;
-  background: black;
-  margin-bottom: 5px;
-}
-
-.memory {
-  font-size: 12px;
-  color: #00f5ff;
-  margin-top: 5px;
-}
-
-.memory pre {
-  background: #0b1220;
-  padding: 5px;
-  max-height: 120px;
-  overflow: auto;
-}
-
-details summary {
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
 }
