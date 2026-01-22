@@ -1,37 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jarvis</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Jarvis AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="hud">
-  <div class="top">JARVIS • STANDBY</div>
+<div class="app">
+  <h1>🤖 Jarvis</h1>
 
-  <!-- CAMERA -->
   <video id="camera" autoplay muted></video>
 
-  <!-- CHAT -->
-  <div id="chat"></div>
+  <div class="chat" id="chat"></div>
 
-  <!-- INPUT -->
-  <div class="input-area">
-    <input id="textInput" placeholder="Type here..." />
-    <button onclick="sendText()">➤</button>
-    <button onclick="wakeJarvis()">⚡</button>
+  <div class="input-box">
+    <input type="text" id="userInput" placeholder="Type here..." />
+    <button onclick="sendText()">Send</button>
+    <button onclick="startMic()">🎤</button>
   </div>
-
-  <!-- MEMORY PANEL -->
-  <details class="memory">
-    <summary>🧠 Memory</summary>
-    <pre id="memoryView"></pre>
-    <button onclick="clearMemory()">Clear Memory</button>
-  </details>
 </div>
 
-<script src="jarvis.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
