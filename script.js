@@ -1,252 +1,109 @@
-/* ===============================
-   JARVIS AI – BIG JS CORE
-   =============================== */
+let chat = document.getElementById("chat");
+let userInput = document.getElementById("userInput");
 
-const chat = document.getElementById("chat");
-const input = document.getElementById("userInput");
-const cam = document.getElementById("cam");
-
-/* ---------- MEMORY SYSTEM ---------- */
-let memory = JSON.parse(localStorage.getItem("jarvisMemory")) || {
-  owner: "Abhiraj",
-  mood: "normal",
+let memory = {
+  name: "Abhi",
   likes: [],
-  dislikes: [],
-  notes: [],
-  facts: {},
-  face: null,
-  chats: []
+  notes: []
 };
 
-function saveMemory(){
-  localStorage.setItem("jarvisMemory", JSON.stringify(memory));
+// ===== LOAD MEMORY =====
+function loadMemory() {
+  let saved = localStorage.getItem("jarvis_memory");
+  if (saved) memory = JSON.parse(saved);
+}
+loadMemory();
+
+// ===== SAVE MEMORY =====
+function saveMemory() {
+  localStorage.setItem("jarvis_memory", JSON.stringify(memory));
 }
 
-/* ---------- UI HELPERS ---------- */
-function add(text, cls){
-  let d = document.createElement("div");
-  d.className = cls;
-  d.innerText = text;
-  chat.appendChild(d);
+// ===== SPEAK =====
+function speak(text) {
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "en-IN";
+  speechSynthesis.speak(msg);
+  addMsg("Jarvis", text);
+}
+
+// ===== CHAT UI =====
+function addMsg(who, text) {
+  let div = document.createElement("div");
+  div.className = "msg " + (who === "You" ? "user" : "jarvis");
+  div.innerText = who + ": " + text;
+  chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
 
-function speak(text){
-  let u = new SpeechSynthesisUtterance(text);
-  u.rate = 1;
-  u.pitch = 1;
-  speechSynthesis.speak(u);
+// ===== TEXT INPUT =====
+function sendText() {
+  let text = userInput.value;
+  if (!text) return;
+  addMsg("You", text);
+  userInput.value = "";
+  handleInput(text.toLowerCase());
 }
 
-/* ---------- MAIN BRAIN ---------- */
-function brain(text){
-  text = text.toLowerCase().trim();
+// ===== VOICE INPUT =====
+let recognition;
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = "en-IN";
 
-  if(!text.includes("jarvis")) return null;
-  text = text.replace("jarvis","").trim();
-
-  /* BASIC */
-  if(text === "") return "Yes boss 😎";
-  if(text.includes("your name")) return "My name is Jarvis.";
-  if(text.includes("who made you")) return "You made me boss 🔥";
-  if(text.includes("who am i")) return `You are ${memory.owner}.`;
-
-  /* TIME + DATE */
-  if(text.includes("time")) return new Date().toLocaleTimeString();
-  if(text.includes("date")) return new Date().toDateString();
-
-  /* MOOD */
-  if(text.includes("how are you")){
-    if(memory.mood==="happy") return "Feeling great 😄";
-    if(memory.mood==="sad") return "Little sad 🥲";
-    return "I am normal 🙂";
-  }
-
-  if(text.includes("be happy")){
-    memory.mood="happy"; saveMemory();
-    return "Mood updated 😄";
-  }
-
-  if(text.includes("be sad")){
-    memory.mood="sad"; saveMemory();
-    return "Okay 🥲";
-  }
-
-  /* REMEMBER NOTES */
-  if(text.startsWith("remember")){
-    let note = text.replace("remember","").trim();
-    memory.notes.push(note);
-    saveMemory();
-    return "Saved in memory 🧠";
-  }
-
-  if(text.includes("what did i say")){
-    return memory.notes.length
-      ? memory.notes[memory.notes.length-1]
-      : "Nothing remembered yet.";
-  }
-
-  /* LIKES / DISLIKES */
-  if(text.startsWith("i like")){
-    let l = text.replace("i like","").trim();
-    memory.likes.push(l);
-    saveMemory();
-    return `Okay, you like ${l}`;
-  }
-
-  if(text.startsWith("i hate")){
-    let d = text.replace("i hate","").trim();
-    memory.dislikes.push(d);
-    saveMemory();
-    return `Got it, you hate ${d}`;
-  }
-
-  if(text.includes("what do i like")){
-    return memory.likes.length
-      ? "You like: " + memory.likes.join(", ")
-      : "You never told me.";
-  }
-
-  if(text.includes("what do i hate")){
-    return memory.dislikes.length
-      ? "You hate: " + memory.dislikes.join(", ")
-      : "You never told me.";
-  }
-
-  /* FACT SYSTEM */
-  if(text.startsWith("my")){
-    let parts = text.split("is");
-    if(parts.length===2){
-      let key = parts[0].replace("my","").trim();
-      let val = parts[1].trim();
-      memory.facts[key] = val;
-      saveMemory();
-      return `Okay, your ${key} is ${val}`;
-    }
-  }
-
-  if(text.startsWith("what is my")){
-    let key = text.replace("what is my","").trim();
-    return memory.facts[key]
-      ? `Your ${key} is ${memory.facts[key]}`
-      : "I don't know that yet.";
-  }
-
-  /* CHAT MEMORY */
-  if(text.includes("what we talked")){
-    return memory.chats.slice(-5).join(" | ") || "No chat history.";
-  }
-
-  /* COMMANDS */
-  if(text.includes("clear memory")){
-    localStorage.clear();
-    return "All memory wiped 🧹";
-  }
-
-  if(text.includes("sleep")){
-    return "Going silent 😴";
-  }
-
-  /* DEFAULT SMART REPLY */
-  return randomReply();
-}
-
-/* ---------- RANDOM CHAT ---------- */
-function randomReply(){
-  let arr = [
-    "Say clearly boss 🙂",
-    "Hmm interesting 🤔",
-    "I am listening 👂",
-    "Try another command 😎",
-    "Explain more boss 🔥"
-  ];
-  return arr[Math.floor(Math.random()*arr.length)];
-}
-
-/* ---------- SEND ---------- */
-function send(){
-  let t = input.value.trim();
-  if(!t) return;
-  input.value = "";
-
-  add("You: "+t, "user");
-  memory.chats.push(t);
-  saveMemory();
-
-  let ans = brain(t);
-  if(ans){
-    add("Jarvis: "+ans, "bot");
-    speak(ans);
-  }
-}
-
-/* ---------- VOICE INPUT ---------- */
-function startListening(){
-  let r = new webkitSpeechRecognition();
-  r.lang = "en-IN";
-  r.continuous = true;
-
-  r.onresult = e=>{
-    let t = e.results[e.results.length-1][0].transcript;
-    add("You: "+t,"user");
-    memory.chats.push(t);
-
-    let ans = brain(t);
-    if(ans){
-      add("Jarvis: "+ans,"bot");
-      speak(ans);
-    }
-    saveMemory();
+  recognition.onresult = (e) => {
+    let text = e.results[0][0].transcript;
+    addMsg("You", text);
+    handleInput(text.toLowerCase());
   };
 
-  r.start();
-  add("Jarvis: Listening 🎧","bot");
+  recognition.start();
 }
 
-/* ---------- CAMERA + FACE ---------- */
-let canvas = document.createElement("canvas");
-let ctx = canvas.getContext("2d");
+// ===== AI LOGIC =====
+function handleInput(text) {
 
-function openCamera(){
-  navigator.mediaDevices.getUserMedia({video:true})
-  .then(stream=>{
-    cam.style.display="block";
-    cam.srcObject=stream;
-    setTimeout(captureFace, 3000);
-  });
-}
+  if (text.includes("hello") || text.includes("hi")) {
+    speak("Hello boss 😎");
+  }
 
-function captureFace(){
-  canvas.width = cam.videoWidth;
-  canvas.height = cam.videoHeight;
-  ctx.drawImage(cam,0,0);
-  let img = canvas.toDataURL();
+  else if (text.includes("my name")) {
+    speak("Your name is " + memory.name);
+  }
 
-  if(!memory.face){
-    memory.face = img;
+  else if (text.includes("i like")) {
+    let like = text.replace("i like", "").trim();
+    memory.likes.push(like);
     saveMemory();
-    add("Jarvis: Face saved 😎","bot");
-    speak("Yo boss");
-  }else{
-    if(img.slice(0,1000) === memory.face.slice(0,1000)){
-      add("Jarvis: Welcome back boss 😎","bot");
-      speak("Welcome back boss");
-    }else{
-      add("Jarvis: Who are you?","bot");
-      speak("Who are you");
-    }
+    speak("Okay, you like " + like);
+  }
+
+  else if (text.includes("what do i like")) {
+    speak("You like " + memory.likes.join(", "));
+  }
+
+  else if (text.includes("remember")) {
+    let note = text.replace("remember", "").trim();
+    memory.notes.push(note);
+    saveMemory();
+    speak("Saved in memory");
+  }
+
+  else if (text.includes("what did i say")) {
+    speak("Last thing you said was " + memory.notes[memory.notes.length - 1]);
+  }
+
+  else {
+    speak("I am learning boss 🤖");
   }
 }
 
-/* ---------- EXTRA ---------- */
-function showMemory(){
-  add("Likes: "+memory.likes.join(", "),"bot");
-  add("Notes: "+memory.notes.join(" | "),"bot");
-}
+// ===== CAMERA =====
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+  document.getElementById("camera").srcObject = stream;
+});
 
-function clearChat(){
-  chat.innerHTML="";
-}
-
-/* ---------- START ---------- */
-add("Jarvis: Online. Say 'Jarvis' 🔥","bot");
+// ===== START =====
+speak("Jarvis online boss 🔥");
