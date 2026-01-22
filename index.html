@@ -1,37 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jarvis AI</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jarvis</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<div class="app">
+<div class="hud">
+  <div class="top">JARVIS • ONLINE</div>
 
-  <div class="header">
-    🤖 Jarvis AI
+  <div id="chat"></div>
+
+  <div class="input-area">
+    <input id="textInput" placeholder="Type or say something..." />
+    <button onclick="sendText()">➤</button>
+    <button onclick="startVoice()">🎤</button>
   </div>
-
-  <div id="chat" class="chat"></div>
-
-  <video id="cam" autoplay playsinline></video>
-
-  <div class="controls">
-    <input id="userInput" placeholder="Say or type: Jarvis..." />
-    <button onclick="send()">💬</button>
-  </div>
-
-  <div class="panel">
-    <button onclick="startListening()">🎤 Talk</button>
-    <button onclick="openCamera()">📷 Face</button>
-    <button onclick="showMemory()">🧠 Memory</button>
-    <button onclick="clearChat()">🧹 Clear</button>
-  </div>
-
 </div>
 
-<script src="script.js"></script>
+<script src="jarvis.js"></script>
 </body>
 </html>
