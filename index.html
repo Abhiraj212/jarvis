@@ -7,15 +7,21 @@
 </head>
 <body>
 
-<div class="chat-box">
+<div class="app">
   <h2>🤖 Jarvis</h2>
 
   <div id="chat"></div>
 
-  <input id="userInput" placeholder="Type here..." />
-  <button onclick="send()">Send</button>
+  <input id="userInput" placeholder="Type or say 'Jarvis...'" />
+  <div class="btns">
+    <button onclick="send()">Send</button>
+    <button onclick="startListening()">🎤 Start</button>
+    <button onclick="openCamera()">📷 Camera</button>
+  </div>
+
+  <video id="cam" autoplay playsinline></video>
 </div>
 
 <script src="script.js"></script>
 </body>
-    </html>
+</html>
