@@ -29,7 +29,9 @@ jobs:
             echo "Android SDK command-line tools not found in $ANDROID_HOME"
             exit 1
           fi
-          yes | "$SDKMANAGER" --licenses >/dev/null
+          # sdkmanager may close stdin after accepting licenses; ignore only yes's SIGPIPE,
+          # while still failing if sdkmanager itself returns a non-zero status.
+          yes | "$SDKMANAGER" --licenses >/dev/null || [[ "${PIPESTATUS[1]}" -eq 0 ]]
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
