@@ -1,5 +1,6 @@
 name: Build Abhiraj DJ Studio APK
 
+# Build the uploaded ZIP from the repository root.
 on:
   workflow_dispatch:
   push:
