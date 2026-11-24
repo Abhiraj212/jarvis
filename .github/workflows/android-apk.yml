@@ -1,8 +1,8 @@
-name: Build JARVIS Android APK
+name: Build JARVIS and DJ Studio Android APKs
 
 on:
   push:
-    branches: [main]
+    branches: [main, abhiraj-dj-studio-import]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
@@ -29,18 +29,22 @@ jobs:
             echo "Android SDK command-line tools not found in $ANDROID_HOME"
             exit 1
           fi
-          # sdkmanager may close stdin after accepting licenses; ignore only yes's SIGPIPE,
-          # while still failing if sdkmanager itself returns a non-zero status.
           yes | "$SDKMANAGER" --licenses >/dev/null || [[ "${PIPESTATUS[1]}" -eq 0 ]]
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
-      - name: Build APK
-        run: gradle --no-daemon --stacktrace :app:assembleDebug
+      - name: Build both APKs
+        run: gradle --no-daemon --stacktrace :app:assembleDebug :djstudio:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: JARVIS-Android-debug-APK
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Abhiraj-DJ-Studio-debug-APK
+          path: djstudio/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
