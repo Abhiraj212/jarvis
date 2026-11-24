@@ -1,26 +1,29 @@
-# JARVIS Android Dual-Device
+# FamilyGuard Android
 
-Android app source for the JARVIS + ESP8266 setup.
+FamilyGuard is a transparent, consent-based family safety prototype with two separate Android apps:
 
-## Devices
-- Android 11: press-to-talk voice recognition and manual LIGHT ON/OFF controls. Offline speech depends on an installed offline recognition service and language pack.
-- Android 2.3: manual UDP controls are intended to work; voice recognition is not guaranteed.
+- **FamilyGuard Parent**: parent-facing dashboard.
+- **FamilyGuard Child**: child-facing transparency and sharing-controls screen.
 
-## Build
-Pushes to `main` run GitHub Actions. Open the repository's **Actions** tab, select **Build JARVIS Android APK**, and download the `JARVIS-Android-debug-APK` artifact when the run succeeds.
+## Current prototype status
 
-The workflow uses JDK 17, Android SDK 35, and Gradle 8.7. The APK is a debug build, not a Play Store release.
+This first build is a UI-only prototype. It does not request permissions, collect device activity, access location, read call logs, capture messages/searches, or transmit data. Dashboard statuses are clearly marked as not connected.
 
-## Connect to NodeMCU
-1. Put the phone and NodeMCU on the same private hotspot/LAN.
-2. Enter the correct broadcast IP (or NodeMCU local IP) in the app.
-3. Enter the exact firmware `COMMAND_TOKEN`.
-4. The app sends `TOKEN|LIGHT_ON` or `TOKEN|LIGHT_OFF` over UDP port 4210.
+## Privacy and safety principles
 
-UDP send success is not confirmation that the NodeMCU received the command. The token is plaintext, not encryption. Do not use this app to switch household mains wiring; use a qualified electrician and proper isolation/fail-safe hardware.
+- No hidden monitoring or stealth mode.
+- Child-facing disclosure before any future data sharing.
+- Android runtime permissions and visible controls for optional sharing.
+- Data minimization, secure transport, deletion controls, and clear retention limits before adding a backend.
+- No call-log, SMS, message-content, or private search-history collection.
 
-## Limitations
-- Press-to-talk only, no always-on wake word.
-- Offline speech is best-effort and depends on the phone's recognition provider.
-- Android 2.3 voice support is not guaranteed.
-- No APK is committed to the repository; GitHub Actions creates it as an artifact.
+## Build APKs
+
+The GitHub Actions workflow **Build FamilyGuard Android APKs** builds two debug APKs:
+
+- Parent: `parent/build/outputs/apk/debug/parent-debug.apk`
+- Child: `child/build/outputs/apk/debug/child-debug.apk`
+
+Push to `familyguard-android` or run the workflow manually from the Actions tab. Download the artifact named **FamilyGuard-Android-APKs**.
+
+Build uses JDK 17, Android Gradle Plugin 8.6.1, Gradle 8.7, and Android SDK 35. Debug APKs are for testing, not Play Store release builds.
