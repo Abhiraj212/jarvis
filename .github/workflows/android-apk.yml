@@ -2,7 +2,7 @@ name: Build JARVIS Android APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, abhiraj-dj-studio-import]
   workflow_dispatch:
 
 permissions:
