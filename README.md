@@ -3,19 +3,27 @@
 FamilyGuard is a transparent, consent-based family safety prototype with two separate Android apps:
 
 - **FamilyGuard Parent**: parent-facing dashboard.
-- **FamilyGuard Child**: child-facing transparency and sharing-controls screen.
+- **FamilyGuard Child**: child-facing disclosure, consent, and sharing preferences.
 
-## Current prototype status
+## Current build status
 
-This first build is a UI-only prototype. It does not request permissions, collect device activity, access location, read call logs, capture messages/searches, or transmit data. Dashboard statuses are clearly marked as not connected.
+The Child app now includes:
+- A terms and conditions disclosure with an explicit acknowledgement checkbox.
+- Separate opt-in switches for location, screen-time summary, app-usage summary, safe-browsing category alerts, and selected storage items.
+- Android's system document picker for selecting individual files and its folder picker for selecting a folder.
+- Local-only storage of preferences and persistable URI read grants.
 
-## Privacy and safety principles
+The file/folder selections are currently kept on the child device. **They are not uploaded or visible to the Parent app yet.** The other feature switches save preferences only; they do not activate tracking or request Android permissions. Parent-child pairing and backend syncing are not implemented.
+
+## Privacy boundaries
 
 - No hidden monitoring or stealth mode.
-- Child-facing disclosure before any future data sharing.
-- Android runtime permissions and visible controls for optional sharing.
-- Data minimization, secure transport, deletion controls, and clear retention limits before adding a backend.
-- No call-log, SMS, message-content, or private search-history collection.
+- No whole-device storage scan or unrestricted file access.
+- No private browser search-query capture or full search-history copying.
+- No call-log, SMS, or message-content collection.
+- File and folder access is limited to items selected through Android's system picker.
+- Android system permissions, when implemented for a feature, must be requested separately and can be denied or revoked.
+- Future backend sharing must include secure transport, data minimization, deletion controls, and clear retention limits.
 
 ## Build APKs
 
