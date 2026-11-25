@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.graphics.Color
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.LinearLayout
@@ -83,20 +82,47 @@ class MainActivity : Activity() {
             } else if (requestCode == 4102) {
                 data.data?.let { rememberUri(it, data.flags) }
             }
-            selectedLabel.text = "Selected on this phone: ${selectedItems.size} item(s). Nothing has been uploaded or shared with a parent."
+            refreshSelectedLabel()
         } catch (_: SecurityException) {
             Toast.makeText(this, "Android did not grant access to that selection.", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun rememberUri(uri: Uri, flags: Int) {
-        val takeFlags = flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        contentResolver.takePersistableUriPermission(uri, takeFlags)
+        val readFlag = flags and Intent.FLAG_GRANT_READ_URI_PERMISSION
+        if (readFlag != 0) contentResolver.takePersistableUriPermission(uri, readFlag)
         selectedItems.add(uri.toString())
+        prefs.edit().putStringSet("selected_storage_uris", HashSet(selectedItems)).apply()
+    }
+
+    private fun clearSelectedItems() {
+        selectedItems.forEach { value ->
+            try {
+                contentResolver.releasePersistableUriPermission(
+                    Uri.parse(value),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: SecurityException) {
+                // The provider may already have revoked this grant.
+            }
+        }
+        selectedItems.clear()
+        prefs.edit().remove("selected_storage_uris").apply()
+        refreshSelectedLabel()
+        Toast.makeText(this, "Selected file and folder access has been removed.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun refreshSelectedLabel() {
+        selectedLabel.text = if (selectedItems.isEmpty()) {
+            "No items selected. Selection is stored locally on this phone only."
+        } else {
+            "Selected on this phone: ${selectedItems.size} item(s). Nothing has been uploaded or shared with a parent."
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        selectedItems.addAll(prefs.getStringSet("selected_storage_uris", emptySet()) ?: emptySet())
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(22), dp(24), dp(22), dp(28))
@@ -142,8 +168,9 @@ class MainActivity : Activity() {
         root.addView(label("SELECT FILES OR FOLDERS", 12f, green, true).apply { setPadding(dp(4), dp(20), dp(4), dp(6)) })
         root.addView(actionButton("Choose individual file(s)", ::pickDocument))
         root.addView(actionButton("Choose a folder", ::pickFolder))
-        selectedLabel = label("No items selected. Selection is stored locally on this phone only.", 12f, muted)
+        selectedLabel = label("", 12f, muted)
         root.addView(selectedLabel)
+        root.addView(actionButton("Remove access to selected items", ::clearSelectedItems))
 
         root.addView(actionButton("Save my choices") {
             if (!agreement.isChecked) {
@@ -154,6 +181,7 @@ class MainActivity : Activity() {
             }
         })
         root.addView(label("Prototype status: local consent and file selection only. Parent syncing, location sharing, and usage reports are not connected yet. You can change these choices here at any time.", 12f, muted))
+        refreshSelectedLabel()
         val scroll = ScrollView(this).apply { addView(root) }
         setContentView(scroll)
     }
